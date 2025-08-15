@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -10,6 +9,7 @@ import {
 
 const FALLBACK_IMG = "https://placehold.co/800x600?text=EconoDeal";
 
+// Magasins (filtre)
 const STORES = [
   { value: "all", fr: "Tous", en: "All" },
   { value: "ebay", fr: "eBay", en: "eBay" },
@@ -20,6 +20,7 @@ const STORES = [
   { value: "best buy", fr: "Best Buy", en: "Best Buy" },
 ];
 
+// Cartes exemples (tu peux mettre un ASIN réel sur une ou deux cartes)
 const DEALS = [
   { id: "eb-1", title_fr: "Casque Bluetooth ANC", title_en: "Bluetooth ANC Headphones", img: "https://placehold.co/1200x800/28a745/FFF?text=eBay+1", price: 79.99, oldPrice: 189.99, store: "eBay", link: "https://www.ebay.ca/", badge: "-58%", asin: "DEMO" },
   { id: "wm-1", title_fr: "TV 55\" 4K", title_en: "55\" 4K TV", img: "https://placehold.co/1200x800/0d6efd/FFF?text=Walmart+1", price: 499.0, oldPrice: 799.0, store: "Walmart", link: "https://www.walmart.ca/", badge: "-38%", asin: "DEMO" },
@@ -29,11 +30,13 @@ const DEALS = [
   { id: "bb-1", title_fr: "Portable 15\" i5", title_en: "15\" Laptop i5", img: "https://placehold.co/1200x800/6610f2/FFF?text=Best+Buy+1", price: 699.0, oldPrice: 999.0, store: "Best Buy", link: "https://www.bestbuy.ca/", badge: "-30%", asin: "DEMO" },
 ];
 
+// Textes FR/EN
 const LANG = {
-  fr:{slogan:"Le meilleur outil pour dénicher, revendre et économiser.",ctaPrimary:"Rejoindre la liste d’attente",ctaSecondary:"Voir les spéciaux",heroTitle:"EconoDeal",heroSub:"Liquidations en temps réel • Par magasin • Par SKU",sectionDeals:"Spéciaux (démo/Keepa)",badgeDemo:"Démo",footer:"© "+new Date().getFullYear()+" EconoDeal.",langSwitch:"EN",storeFilterLabel:"Magasins",storeEmpty:"Aucun deal pour ce magasin (démo).",keepaTitle:"Ventes Amazon (Keepa)",avgPerMonth:"Moyenne / mois"},
-  en:{slogan:"The best tool to find, resell and save.",ctaPrimary:"Join the waitlist",ctaSecondary:"See specials",heroTitle:"EconoDeal",heroSub:"Real-time clearances • By store • By SKU",sectionDeals:"Specials (demo/Keepa)",badgeDemo:"Demo",footer:"© "+new Date().getFullYear()+" EconoDeal.",langSwitch:"FR",storeFilterLabel:"Stores",storeEmpty:"No deals for this store (demo).",keepaTitle:"Amazon Sales (Keepa)",avgPerMonth:"Average / month"},
+  fr:{slogan:"Le meilleur outil pour dénicher, revendre et économiser.",ctaSecondary:"Voir les spéciaux",heroTitle:"EconoDeal",heroSub:"Liquidations en temps réel • Par magasin • Par SKU",sectionDeals:"Spéciaux (démo/Keepa)",badgeDemo:"Démo",footer:"© "+new Date().getFullYear()+" EconoDeal.",langSwitch:"EN",storeEmpty:"Aucun deal pour ce magasin (démo).",keepaTitle:"Ventes Amazon (Keepa)",avgPerMonth:"Moyenne / mois"},
+  en:{slogan:"The best tool to find, resell and save.",ctaSecondary:"See specials",heroTitle:"EconoDeal",heroSub:"Real-time clearances • By store • By SKU",sectionDeals:"Specials (demo/Keepa)",badgeDemo:"Demo",footer:"© "+new Date().getFullYear()+" EconoDeal.",langSwitch:"FR",storeEmpty:"No deals for this store (demo).",keepaTitle:"Amazon Sales (Keepa)",avgPerMonth:"Average / month"},
 };
 
+// Démo (si Keepa indispo)
 function demoSales(){
   const m=["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
   return m.map((x,i)=>({m:x,units:Math.round(220+Math.sin(i/2)*40+(i%3===0?20:0))}));
@@ -60,7 +63,9 @@ export default function Page(){
   }
   const closeModal=()=>{ setSelected(null); setKeepa(null); };
 
-  return (<div className="min-h-screen text-slate-800">
+  return (
+  <div className="min-h-screen text-slate-800">
+    {/* HEADER */}
     <header className="sticky top-0 z-30 backdrop-blur bg-white/70 border-b border-emerald-100">
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -76,12 +81,21 @@ export default function Page(){
       </div>
     </header>
 
+    {/* HERO */}
     <section className="mx-auto max-w-7xl px-4 py-12">
       <div className="grid md:grid-cols-2 gap-10 items-center">
         <div>
           <motion.h1 initial={{opacity:0,y:10}} animate={{opacity:1,y:0}} transition={{duration:.6}} className="text-4xl md:text-6xl font-extrabold tracking-tight">{T.heroTitle}</motion.h1>
           <p className="mt-3 text-lg text-slate-600">{T.heroSub}</p>
+          <ul className="mt-6 space-y-2 text-slate-600">
+            <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-600"/> SKU & disponibilité par magasin</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Alertes email personnalisées</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-600"/> Canada ➜ USA (phase 2)</li>
+          </ul>
+          <a href="#deals" className="inline-block mt-6 px-5 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 shadow">{T.ctaSecondary}</a>
         </div>
+
+        {/* Aperçu visuel (6 vignettes) */}
         <motion.div initial={{opacity:0,scale:.98}} animate={{opacity:1,scale:1}} transition={{duration:.6,delay:.1}} className="relative">
           <div className="aspect-[16/10] w-full rounded-3xl bg-white shadow-lg p-4 border border-emerald-100">
             <div className="grid grid-cols-3 gap-3">
@@ -100,8 +114,13 @@ export default function Page(){
       </div>
     </section>
 
+    {/* DEALS */}
     <section className="mx-auto max-w-7xl px-4 py-8" id="deals">
-      <div className="flex items-end justify-between mb-4"><h2 className="text-2xl md:text-3xl font-bold">{T.sectionDeals}</h2><span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 border">{T.badgeDemo}</span></div>
+      <div className="flex items-end justify-between mb-4">
+        <h2 className="text-2xl md:text-3xl font-bold">{T.sectionDeals}</h2>
+        <span className="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 border">{T.badgeDemo}</span>
+      </div>
+
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {filtered.map(d=>(
           <button key={d.id} onClick={()=>openDealModal(d)} className="text-left group rounded-2xl border bg-white overflow-hidden hover:shadow-md transition block">
@@ -111,49 +130,67 @@ export default function Page(){
             </div>
             <div className="p-4">
               <p className="font-semibold line-clamp-2 group-hover:underline">{lang==='fr'?d.title_fr:d.title_en}</p>
-              <div className="mt-2 flex items-baseline gap-2"><span className="text-lg font-bold">${d.price.toFixed(2)}</span><span className="text-slate-400 line-through">${d.oldPrice.toFixed(2)}</span></div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-lg font-bold">${d.price.toFixed(2)}</span>
+                <span className="text-slate-400 line-through">${d.oldPrice.toFixed(2)}</span>
+              </div>
               <div className="mt-3 text-xs text-slate-500">{d.store}</div>
             </div>
           </button>
         ))}
-        {filtered.length===0 && (<div className="col-span-full rounded-2xl border bg-white p-6 text-slate-600 text-center">Aucun deal pour ce magasin (démo).</div>)}
+        {filtered.length===0 && (<div className="col-span-full rounded-2xl border bg-white p-6 text-slate-600 text-center">{T.storeEmpty}</div>)}
       </div>
     </section>
 
-    {selected && (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal>
-      <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl border overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b">
-          <div className="flex items-center gap-3">
-            <div className="h-14 w-20 overflow-hidden rounded-md border"><img src={selected.img} alt="deal" className="h-full w-full object-cover" onError={(e)=>{e.currentTarget.src=FALLBACK_IMG;}}/></div>
-            <div><h3 className="font-semibold leading-tight">{lang==='fr'?selected.title_fr:selected.title_en}</h3><p className="text-sm text-slate-500 flex items-center gap-2"><BarChart3 className="h-4 w-4"/>{T.keepaTitle}{selected.asin&&(<span className="text-xs text-slate-400"> (ASIN: {selected.asin})</span>)}</p></div>
-          </div>
-          <button onClick={closeModal} className="text-slate-500 hover:text-slate-700 p-2 rounded-lg border"><X className="h-4 w-4"/></button>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6 p-5">
-          <div>
-            <h4 className="font-medium mb-2">Ventes / mois {keepa?.source && <span className="text-xs text-slate-400">[{keepa.source}]</span>}</h4>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={(keepa?.sales)||demoSales()} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="m" /><YAxis /><Tooltip /><Legend />
-                  <Bar dataKey="units" name={lang==='fr'?'Ventes':'Sales'} />
-                </BarChart>
-              </ResponsiveContainer>
+    {/* MODALE Keepa */}
+    {selected && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal>
+        <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl border overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b">
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-20 overflow-hidden rounded-md border">
+                <img src={keepa?.imageUrl || selected.img} alt="deal" className="h-full w-full object-cover" onError={(e)=>{e.currentTarget.src=FALLBACK_IMG;}}/>
+              </div>
+              <div>
+                <h3 className="font-semibold leading-tight">{lang==='fr'?selected.title_fr:selected.title_en}</h3>
+                <p className="text-sm text-slate-500 flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4"/>{T.keepaTitle}{selected.asin&&(<span className="text-xs text-slate-400"> (ASIN: {selected.asin})</span>)}
+                </p>
+              </div>
             </div>
+            <button onClick={closeModal} className="text-slate-500 hover:text-slate-700 p-2 rounded-lg border"><X className="h-4 w-4"/></button>
           </div>
-          <div>
-            <h4 className="font-medium mb-2">{T.avgPerMonth}</h4>
-            <div className="rounded-xl border p-5 bg-emerald-50">
-              <p className="text-5xl font-extrabold text-emerald-700">{keepa?.avg ??  avg(demoSales())}</p>
-              <p className="text-slate-600 mt-1">{lang==='fr'?'unités / mois (estimation)':'units / month (estimate)'}</p>
+
+          <div className="grid md:grid-cols-2 gap-6 p-5">
+            <div>
+              <h4 className="font-medium mb-2">Ventes / mois {keepa?.source && <span className="text-xs text-slate-400">[{keepa.source}]</span>}</h4>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={(keepa?.sales)||demoSales()} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="m" /><YAxis /><Tooltip /><Legend />
+                    <Bar dataKey="units" name={lang==='fr'?'Ventes':'Sales'} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <a href={selected.link} target="_blank" rel="noreferrer" className="mt-4 inline-block px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">{lang==='fr'?'Voir le deal':'View deal'}</a>
+            <div>
+              <h4 className="font-medium mb-2">{T.avgPerMonth}</h4>
+              <div className="rounded-xl border p-5 bg-emerald-50">
+                <p className="text-5xl font-extrabold text-emerald-700">{keepa?.avg ??  avg(demoSales())}</p>
+                <p className="text-slate-600 mt-1">{lang==='fr'?'unités / mois (estimation)':'units / month (estimate)'}</p>
+              </div>
+              <a href={selected.link} target="_blank" rel="noreferrer" className="mt-4 inline-block px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700">{lang==='fr'?'Voir le deal':'View deal'}</a>
+            </div>
           </div>
         </div>
       </div>
-    </div>)}
+    )}
 
-    <footer className="border-t bg-white mt-8"><div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">© {new Date().getFullYear()} EconoDeal</div></footer>
-  </div>);
+    {/* FOOTER */}
+    <footer className="border-t bg-white mt-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">{T.footer}</div>
+    </footer>
+  </div>
+  );
 }
